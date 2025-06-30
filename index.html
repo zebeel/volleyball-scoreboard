@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volleyball Scoreboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scoreboard {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .team {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .team.left {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-right: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .team.right {
+            background: linear-gradient(135deg, #4834d4, #686de0);
+        }
+
+        .team-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 8rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        .sets {
+            font-size: 1.8rem;
+            color: rgba(255,255,255,0.9);
+            font-weight: bold;
+        }
+
+        .controls {
+            background: rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 350px;
+            height: 100vh;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(20px);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .settings-panel.active {
+            left: 0;
+        }
+
+        .settings-header {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .setting-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1001;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .winner-modal {
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .winner-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #e74c3c;
+        }
+
+        .winner-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(20);
+                opacity: 0;
+            }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .team-name {
+                font-size: 1.8rem;
+            }
+            
+            .score {
+                font-size: 5rem;
+            }
+            
+            .sets {
+                font-size: 1.4rem;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .speed-control {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .speed-btn {
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .speed-btn.active {
+            background: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="scoreboard">
+            <div class="team left" id="teamA">
+                <div class="team-name" id="teamAName">Đội A</div>
+                <div class="score" id="scoreA">0</div>
+                <div class="sets">Set: <span id="setsA">0</span></div>
+            </div>
+            <div class="team right" id="teamB">
+                <div class="team-name" id="teamBName">Đội B</div>
+                <div class="score" id="scoreB">0</div>
+                <div class="sets">Set: <span id="setsB">0</span></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="toggleSettings()">Cài Đặt</button>
+            <button class="btn btn-warning" onclick="undo()">Hoàn Tác</button>
+            <button class="btn btn-success" onclick="resetSet()">Reset Set</button>
+            <button class="btn btn-danger" onclick="newMatch()">Trận Mới</button>
+            <button class="btn btn-primary" onclick="toggleFullscreen()">Toàn Màn Hình</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">Cài Đặt</div>
+        
+        <div class="setting-group">
+            <label class="setting-label">Tên Đội A:</label>
+            <input type="text" class="setting-input" id="teamANameInput" placeholder="Đội A">
+        </div>
+        
+        <div class="setting-group">
+            <label class="setting-label">Tên Đội B:</label>
+            <input type="text" class="setting-input" id="teamBNameInput" placeholder="Đội B">
+        </div>
+        
+        <div class="setting-group">
+            <label class="setting-label">Điểm thắng set:</label>
+            <input type="number" class="setting-input" id="winPointsInput" min="1" value="25">
+        </div>
+        
+        <div class="setting-group">
+            <label class="setting-label">Số set thắng trận:</label>
+            <input type="number" class="setting-input" id="winSetsInput" min="1" value="3">
+        </div>
+        
+        <div class="setting-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="confirmScoreInput" checked>
+                <label for="confirmScoreInput">Xác nhận trước khi ghi điểm</label>
+            </div>
+        </div>
+        
+        <div class="setting-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="speechEnabledInput" checked>
+                <label for="speechEnabledInput">Đọc tỉ số</label>
+            </div>
+        </div>
+        
+        <div class="setting-group">
+            <label class="setting-label">Tốc độ đọc:</label>
+            <div class="speed-control">
+                <button class="speed-btn" onclick="setSpeechRate(0.5)">Rất chậm</button>
+                <button class="speed-btn" onclick="setSpeechRate(0.7)">Chậm</button>
+                <button class="speed-btn active" onclick="setSpeechRate(1.0)">Bình thường</button>
+                <button class="speed-btn" onclick="setSpeechRate(1.3)">Nhanh</button>
+            </div>
+        </div>
+        
+        <button class="btn btn-success" style="width: 100%; margin-top: 20px;" onclick="saveSettings()">Lưu Cài Đặt</button>
+        <button class="btn btn-warning" style="width: 100%; margin-top: 10px;" onclick="toggleSettings()">Đóng</button>
+    </div>
+
+    <div class="fireworks" id="fireworks"></div>
+
+    <script>
+        // Game state
+        let gameState = {
+            scoreA: 0,
+            scoreB: 0,
+            setsA: 0,
+            setsB: 0,
+            lastScorer: null,
+            isFirstPoint: true
+        };
+
+        // Settings
+        let settings = {
+            teamAName: 'Đội A',
+            teamBName: 'Đội B',
+            winPoints: 25,
+            winSets: 3,
+            confirmScore: true,
+            speechEnabled: true,
+            speechRate: 1.0
+        };
+
+        // History for undo
+        let history = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            updateDisplay();
+            speak("Bắt đầu trận đấu");
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') {
+                    addPoint('A');
+                } else if (e.key === 'ArrowRight') {
+                    addPoint('B');
+                } else if (e.ctrlKey && e.key === 'z') {
+                    e.preventDefault();
+                    undo();
+                }
+            });
+        });
+
+        // Save state to history
+        function saveToHistory() {
+            history.push({
+                scoreA: gameState.scoreA,
+                scoreB: gameState.scoreB,
+                setsA: gameState.setsA,
+                setsB: gameState.setsB,
+                lastScorer: gameState.lastScorer,
+                isFirstPoint: gameState.isFirstPoint
+            });
+        }
+
+        // Add point to team
+        function addPoint(team) {
+            if (settings.confirmScore) {
+                showConfirmModal(team);
+            } else {
+                executeAddPoint(team);
+            }
+        }
+
+        function executeAddPoint(team) {
+            saveToHistory();
+            
+            const teamElement = document.getElementById('team' + team);
+            teamElement.classList.add('pulse');
+            setTimeout(() => teamElement.classList.remove('pulse'), 500);
+
+            if (team === 'A') {
+                gameState.scoreA++;
+                document.getElementById('scoreA').textContent = gameState.scoreA;
+            } else {
+                gameState.scoreB++;
+                document.getElementById('scoreB').textContent = gameState.scoreB;
+            }
+            
+            // Check for set win first
+            const hasWinner = checkSetWin();
+            
+            // Only announce score if no winner
+            if (!hasWinner && settings.speechEnabled) {
+                announceScore(team);
+            }
+            gameState.lastScorer = team;
+            gameState.isFirstPoint = false;
+        }
+
+        function announceScore(team) {
+            let announcement = "";
+            
+            if (gameState.isFirstPoint) {
+                announcement = `Điểm cho ${settings['team' + team + 'Name']}. `;
+            } else if (gameState.lastScorer !== team) {
+                announcement = `Đổi điểm cho ${settings['team' + team + 'Name']}. `;
+            } else {
+                announcement = `Điểm cho ${settings['team' + team + 'Name']}. `;
+            }
+
+            // Add score - team that scored gets their score read first
+            if (gameState.scoreA === gameState.scoreB) {
+                announcement += `${gameState.scoreA} đều`;
+            } else {
+                if (team === 'A') {
+                    announcement += `${gameState.scoreA} - ${gameState.scoreB}`;
+                } else {
+                    announcement += `${gameState.scoreB} - ${gameState.scoreA}`;
+                }
+            }
+
+            speak(announcement);
+        }
+
+        function checkSetWin() {
+            let winner = null;
+            const scoreA = gameState.scoreA;
+            const scoreB = gameState.scoreB;
+            const minWin = settings.winPoints;
+
+            if ((scoreA >= minWin || scoreB >= minWin) && Math.abs(scoreA - scoreB) >= 2) {
+                if (scoreA > scoreB) {
+                    winner = 'A';
+                    gameState.setsA++;
+                } else {
+                    winner = 'B';
+                    gameState.setsB++;
+                }
+
+                updateDisplay();
+                
+                // Check for match win
+                if (gameState.setsA >= settings.winSets || gameState.setsB >= settings.winSets) {
+                    setTimeout(() => showMatchWinner(winner), 500);
+                } else {
+                    setTimeout(() => showSetWinner(winner), 500);
+                }
+                
+                return true; // Has winner
+            }
+            
+            return false; // No winner
+        }
+
+        function showSetWinner(winner) {
+            createFireworks();
+            const winnerName = settings['team' + winner + 'Name'];
+            speak(`Chúc mừng ${winnerName} chiến thắng set đấu với tỉ số là ${gameState.scoreA} - ${gameState.scoreB}`);
+            
+            showModal(`
+                <div class="winner-modal">
+                    <div class="winner-title">🏆 Set Win!</div>
+                    <div class="winner-subtitle">Chúc mừng ${winnerName} thắng set đấu!</div>
+                    <div style="font-size: 1.2rem; margin-bottom: 20px;">Tỉ số: ${gameState.scoreA} - ${gameState.scoreB}</div>
+                    <button class="btn btn-success" onclick="nextSet()">Tiếp tục set tiếp theo?</button>
+                </div>
+            `);
+        }
+
+        function showMatchWinner(winner) {
+            console.log('Match winner:', winner);
+            console.log('setting', settings);
+            console.log('gameState', gameState);
+            createFireworks();
+            const winnerName = settings['team' + winner + 'Name'];
+            speak(`Chúc mừng ${winnerName} chiến thắng với tỉ số set chung cuộc là ${winner == 'A' ? gameState.setsA : gameState.setsB} - ${winner == 'A' ? gameState.setsB : gameState.setsA}`);
+            
+            showModal(`
+                <div class="winner-modal">
+                    <div class="winner-title">🎉 Match Winner!</div>
+                    <div class="winner-subtitle">Chúc mừng ${winnerName} chiến thắng trận đấu!</div>
+                    <div style="font-size: 1.2rem; margin-bottom: 20px;">Tỉ số set: ${winner == 'A' ? gameState.setsA : gameState.setsB} - ${winner == 'A' ? gameState.setsB : gameState.setsA}</div>
+                    <button class="btn btn-success" onclick="newMatch()">Tiếp tục trận tiếp theo?</button>
+                </div>
+            `);
+        }
+
+        function nextSet() {
+            closeModals();
+            gameState.scoreA = 0;
+            gameState.scoreB = 0;
+            gameState.isFirstPoint = true;
+            gameState.lastScorer = null;
+            history = [];
+            updateDisplay();
+            speak("Bắt đầu trận đấu");
+        }
+
+        function createFireworks() {
+            const fireworksContainer = document.getElementById('fireworks');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.left = Math.random() * window.innerWidth + 'px';
+                    firework.style.top = Math.random() * window.innerHeight + 'px';
+                    firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    fireworksContainer.appendChild(firework);
+                    
+                    setTimeout(() => {
+                        firework.remove();
+                    }, 1000);
+                }, i * 50);
+            }
+        }
+
+        function speak(text) {
+            if (!settings.speechEnabled) return;
+            
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'vi-VN';
+            utterance.rate = settings.speechRate;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function undo() {
+            if (history.length === 0) return;
+            
+            const previousState = history.pop();
+            gameState = { ...previousState };
+            updateDisplay();
+        }
+
+        function resetSet() {
+            saveToHistory();
+            gameState.scoreA = 0;
+            gameState.scoreB = 0;
+            gameState.isFirstPoint = true;
+            gameState.lastScorer = null;
+            updateDisplay();
+            speak("Bắt đầu trận đấu");
+        }
+
+        function newMatch() {
+            closeModals();
+            gameState = {
+                scoreA: 0,
+                scoreB: 0,
+                setsA: 0,
+                setsB: 0,
+                lastScorer: null,
+                isFirstPoint: true
+            };
+            history = [];
+            updateDisplay();
+            speak("Bắt đầu trận đấu");
+        }
+
+        function updateDisplay() {
+            document.getElementById('scoreA').textContent = gameState.scoreA;
+            document.getElementById('scoreB').textContent = gameState.scoreB;
+            document.getElementById('setsA').textContent = gameState.setsA;
+            document.getElementById('setsB').textContent = gameState.setsB;
+            document.getElementById('teamAName').textContent = settings.teamAName;
+            document.getElementById('teamBName').textContent = settings.teamBName;
+        }
+
+        // Team click handlers
+        document.getElementById('teamA').addEventListener('click', () => addPoint('A'));
+        document.getElementById('teamB').addEventListener('click', () => addPoint('B'));
+
+        // Settings functions
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            const overlay = document.getElementById('overlay');
+            
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+                overlay.classList.remove('active');
+            } else {
+                panel.classList.add('active');
+                overlay.classList.add('active');
+                loadSettingsToUI();
+            }
+        }
+
+        function loadSettingsToUI() {
+            document.getElementById('teamANameInput').value = settings.teamAName;
+            document.getElementById('teamBNameInput').value = settings.teamBName;
+            document.getElementById('winPointsInput').value = settings.winPoints;
+            document.getElementById('winSetsInput').value = settings.winSets;
+            document.getElementById('confirmScoreInput').checked = settings.confirmScore;
+            document.getElementById('speechEnabledInput').checked = settings.speechEnabled;
+        }
+
+        function saveSettings() {
+            settings.teamAName = document.getElementById('teamANameInput').value || 'Đội A';
+            settings.teamBName = document.getElementById('teamBNameInput').value || 'Đội B';
+            settings.winPoints = parseInt(document.getElementById('winPointsInput').value) || 25;
+            settings.winSets = parseInt(document.getElementById('winSetsInput').value) || 3;
+            settings.confirmScore = document.getElementById('confirmScoreInput').checked;
+            settings.speechEnabled = document.getElementById('speechEnabledInput').checked;
+            
+            updateDisplay();
+            toggleSettings();
+            
+            // Save to localStorage equivalent (in-memory for this demo)
+            localStorage?.setItem('volleyballSettings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            try {
+                const saved = localStorage?.getItem('volleyballSettings');
+                if (saved) {
+                    settings = { ...settings, ...JSON.parse(saved) };
+                }
+            } catch (e) {
+                console.log('Could not load settings');
+            }
+        }
+
+        function setSpeechRate(rate) {
+            settings.speechRate = rate;
+            
+            // Update UI
+            document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Modal functions
+        function showConfirmModal(team) {
+            const teamName = settings['team' + team + 'Name'];
+            showModal(`
+                <div class="modal">
+                    <h2>Xác nhận ghi điểm</h2>
+                    <p>Tăng điểm cho ${teamName}?</p>
+                    <div class="modal-buttons">
+                        <button class="btn btn-success" onclick="confirmAddPoint('${team}')">Có</button>
+                        <button class="btn btn-warning" onclick="closeModals()">Không</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function confirmAddPoint(team) {
+            closeModals();
+            executeAddPoint(team);
+        }
+
+        function showModal(content) {
+            document.getElementById('overlay').innerHTML = content;
+            document.getElementById('overlay').classList.add('active');
+            
+            // Prevent modal from closing when clicking outside
+            document.getElementById('overlay').onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
+
+        function closeModals() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('settingsPanel').classList.remove('active');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(console.log);
+            } else {
+                document.exitFullscreen().catch(console.log);
+            }
+        }
+    </script>
+</body>
+</html>
