@@ -608,11 +608,19 @@
 
         function speak(text) {
             if (!settings.speechEnabled) return;
-            
-            window.speechSynthesis.cancel();
+
+            const voices = window.speechSynthesis.getVoices();
+            const vietnameseVoice = voices.find(voice => voice.lang === 'vi-VN');
+
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'vi-VN';
             utterance.rate = settings.speechRate;
+
+            if (vietnameseVoice) {
+                utterance.voice = vietnameseVoice;
+            }
+
+            window.speechSynthesis.cancel();
             window.speechSynthesis.speak(utterance);
         }
 
