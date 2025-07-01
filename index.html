@@ -759,6 +759,7 @@
         }
 
         function closeModals() {
+            document.getElementById('overlay').innerHTML = '';
             document.getElementById('overlay').classList.remove('active');
             document.getElementById('settingsPanel').classList.remove('active');
         }
