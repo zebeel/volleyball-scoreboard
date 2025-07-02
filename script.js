@@ -22,10 +22,15 @@
         // History for undo
         let history = [];
 
+        // Ball element
+        let ball;
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            ball = document.getElementById('ball');
             loadSettings();
             updateDisplay();
+            ball.classList.remove('visible');
             speak("Bắt đầu trận đấu");
             
             // Keyboard shortcuts
@@ -76,6 +81,8 @@
                 gameState.scoreB++;
                 document.getElementById('scoreB').textContent = gameState.scoreB;
             }
+
+            positionBall(team);
             
             // Check for set win first
             const hasWinner = checkSetWin();
@@ -86,6 +93,24 @@
             }
             gameState.lastScorer = team;
             gameState.isFirstPoint = false;
+        }
+
+        function positionBall(team) {
+            if (!ball) return;
+            const board = document.querySelector('.scoreboard');
+            const teamEl = document.getElementById('team' + team);
+            const boardRect = board.getBoundingClientRect();
+            const teamRect = teamEl.getBoundingClientRect();
+            const left = teamRect.left - boardRect.left + teamRect.width / 2;
+
+            ball.style.left = left + 'px';
+            ball.classList.add('visible');
+        }
+
+        function stopBallAnimation() {
+            if (ball) {
+                ball.classList.remove('visible');
+            }
         }
 
         function announceScore(team) {
@@ -184,6 +209,7 @@
             gameState.lastScorer = null;
             history = [];
             updateDisplay();
+            stopBallAnimation();
             speak("Bắt đầu trận đấu");
         }
 
@@ -240,6 +266,7 @@
             gameState.isFirstPoint = true;
             gameState.lastScorer = null;
             updateDisplay();
+            stopBallAnimation();
             speak("Bắt đầu trận đấu");
         }
 
@@ -255,6 +282,7 @@
             };
             history = [];
             updateDisplay();
+            stopBallAnimation();
             speak("Bắt đầu trận đấu");
         }
 
@@ -265,6 +293,12 @@
             document.getElementById('setsB').textContent = gameState.setsB;
             document.getElementById('teamAName').textContent = settings.teamAName;
             document.getElementById('teamBName').textContent = settings.teamBName;
+
+            if (gameState.lastScorer) {
+                positionBall(gameState.lastScorer);
+            } else if (ball) {
+                stopBallAnimation();
+            }
         }
 
         // Team click handlers
