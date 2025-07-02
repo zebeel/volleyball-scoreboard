@@ -325,6 +325,28 @@
             font-size: 0.8rem;
         }
 
-        .speed-btn.active {
-            background: rgba(255,255,255,0.4);
-        }
+.speed-btn.active {
+    background: rgba(255,255,255,0.4);
+}
+
+.ball {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    font-size: 3rem;
+    line-height: 48px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    animation: bounce 1s infinite;
+    transition: left 0.6s ease, top 0.6s ease;
+}
+
+.ball.visible {
+    opacity: 1;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
