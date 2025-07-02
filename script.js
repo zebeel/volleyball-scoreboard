@@ -24,7 +24,6 @@
 
         // Ball element
         let ball;
-        let ballAnim;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -99,38 +98,16 @@
         function positionBall(team) {
             if (!ball) return;
             const board = document.querySelector('.scoreboard');
-            const rect = board.getBoundingClientRect();
-            const half = rect.width / 2;
+            const teamEl = document.getElementById('team' + team);
+            const boardRect = board.getBoundingClientRect();
+            const teamRect = teamEl.getBoundingClientRect();
+            const left = teamRect.left - boardRect.left + teamRect.width / 2;
 
-            const bottom = rect.height * 0.9 - ball.offsetHeight;
-            const top = rect.height * 0.1;
-
-            const startLeft = (team === 'A' ? 0 : half) + Math.random() * half - ball.offsetWidth / 2;
-            const midLeft = (team === 'A' ? 0 : half) + Math.random() * half - ball.offsetWidth / 2;
-            const endLeft = (team === 'A' ? 0 : half) + Math.random() * half - ball.offsetWidth / 2;
-
-            ball.style.left = startLeft + 'px';
-            ball.style.top = bottom + 'px';
+            ball.style.left = left + 'px';
             ball.classList.add('visible');
-
-            if (ballAnim) ballAnim.cancel();
-
-            ballAnim = ball.animate([
-                { left: startLeft + 'px', top: bottom + 'px' },
-                { left: midLeft + 'px', top: top + 'px' },
-                { left: endLeft + 'px', top: bottom + 'px' }
-            ], {
-                duration: 1600,
-                iterations: Infinity,
-                easing: 'ease-in-out'
-            });
         }
 
         function stopBallAnimation() {
-            if (ballAnim) {
-                ballAnim.cancel();
-                ballAnim = null;
-            }
             if (ball) {
                 ball.classList.remove('visible');
             }

@@ -331,16 +331,29 @@
 
 .ball {
     position: absolute;
+    bottom: 10%;
+    left: 50%;
     width: 48px;
     height: 48px;
     font-size: 3rem;
     line-height: 48px;
     text-align: center;
     pointer-events: none;
+    transform: translateX(-50%);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, left 0.4s ease;
+    animation: ball-bounce 0.8s infinite ease-in-out;
 }
 
 .ball.visible {
     opacity: 1;
+}
+
+@keyframes ball-bounce {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-20px);
+    }
 }
