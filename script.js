@@ -24,6 +24,7 @@
 
         // Ball element
         let ball;
+        let ballAnim;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -97,14 +98,42 @@
 
         function positionBall(team) {
             if (!ball) return;
-            const scoreEl = document.getElementById('score' + team);
-            const boardRect = document.querySelector('.scoreboard').getBoundingClientRect();
-            const rect = scoreEl.getBoundingClientRect();
-            const left = rect.left - boardRect.left + rect.width / 2 - ball.offsetWidth / 2;
-            const top = rect.top - boardRect.top - ball.offsetHeight - 10;
-            ball.style.left = left + 'px';
-            ball.style.top = top + 'px';
+            const board = document.querySelector('.scoreboard');
+            const rect = board.getBoundingClientRect();
+            const half = rect.width / 2;
+
+            const bottom = rect.height * 0.9 - ball.offsetHeight;
+            const top = rect.height * 0.1;
+
+            const startLeft = (team === 'A' ? 0 : half) + Math.random() * half - ball.offsetWidth / 2;
+            const midLeft = (team === 'A' ? 0 : half) + Math.random() * half - ball.offsetWidth / 2;
+            const endLeft = (team === 'A' ? 0 : half) + Math.random() * half - ball.offsetWidth / 2;
+
+            ball.style.left = startLeft + 'px';
+            ball.style.top = bottom + 'px';
             ball.classList.add('visible');
+
+            if (ballAnim) ballAnim.cancel();
+
+            ballAnim = ball.animate([
+                { left: startLeft + 'px', top: bottom + 'px' },
+                { left: midLeft + 'px', top: top + 'px' },
+                { left: endLeft + 'px', top: bottom + 'px' }
+            ], {
+                duration: 1600,
+                iterations: Infinity,
+                easing: 'ease-in-out'
+            });
+        }
+
+        function stopBallAnimation() {
+            if (ballAnim) {
+                ballAnim.cancel();
+                ballAnim = null;
+            }
+            if (ball) {
+                ball.classList.remove('visible');
+            }
         }
 
         function announceScore(team) {
@@ -203,7 +232,7 @@
             gameState.lastScorer = null;
             history = [];
             updateDisplay();
-            ball.classList.remove('visible');
+            stopBallAnimation();
             speak("Bắt đầu trận đấu");
         }
 
@@ -260,7 +289,7 @@
             gameState.isFirstPoint = true;
             gameState.lastScorer = null;
             updateDisplay();
-            ball.classList.remove('visible');
+            stopBallAnimation();
             speak("Bắt đầu trận đấu");
         }
 
@@ -276,7 +305,7 @@
             };
             history = [];
             updateDisplay();
-            ball.classList.remove('visible');
+            stopBallAnimation();
             speak("Bắt đầu trận đấu");
         }
 
@@ -291,7 +320,7 @@
             if (gameState.lastScorer) {
                 positionBall(gameState.lastScorer);
             } else if (ball) {
-                ball.classList.remove('visible');
+                stopBallAnimation();
             }
         }
 
